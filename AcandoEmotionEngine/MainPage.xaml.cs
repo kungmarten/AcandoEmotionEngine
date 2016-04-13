@@ -65,7 +65,7 @@ namespace AcandoEmotionEngine
         private void ShutdownButton_Click(object sender, RoutedEventArgs e)
         {
             // Exit app
-            Application.Current.Exit();
+            Application.Current.Exit(); 
         }
 
         #region Geocode
@@ -392,7 +392,7 @@ namespace AcandoEmotionEngine
         /// 
         private void InitializeIotHub()
         {
-            AppStatus.Text = "IoT Hub connection is up.";
+            AppStatus.Text = "IoT Hub connection is up."; 
 
             // Create IoT hub device client.
             deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
