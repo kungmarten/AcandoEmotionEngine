@@ -65,7 +65,7 @@ namespace AcandoEmotionEngine
         private void ShutdownButton_Click(object sender, RoutedEventArgs e)
         {
             // Exit app
-            Application.Current.Exit();
+            Application.Current.Exit(); 
         }
 
         #region Geocode
