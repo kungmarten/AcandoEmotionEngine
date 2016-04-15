@@ -54,11 +54,12 @@ namespace AcandoEmotionEngine
                 //LogResultEmoFace(focusFace);
                 logOutput.Text = LogEmoFaces(myEmoFace);
                 //LogResult(myEmoFace.AllEmotions, myEmoFace.AllFaces);
+                string azureuri = "";
                 if (azureLoggingToggleButton.IsChecked == true)
                 {
-                    string azureuri = await UploadPictureToAzure(picture, true);
-                    await LogEmotionResultIot(myEmoFace, azureuri, localLoggingToggleButton.IsChecked);
+                    azureuri = await UploadPictureToAzure(picture, true);
                 }
+                await LogEmotionResultIot(myEmoFace, azureuri, localLoggingToggleButton.IsChecked, azureLoggingToggleButton.IsChecked);
             }
         }
 
@@ -102,6 +103,11 @@ namespace AcandoEmotionEngine
                 MediaCap.Failed += new MediaCaptureFailedEventHandler(MediaCapture_Failed);
 
                 AppStatus.Text = "Camera initialized...Waiting for input!";
+
+                //Initiate the preview
+                PreviewImage.Source = MediaCap;
+                await MediaCap.StartPreviewAsync();
+                AppStatus.Text = "Preview initialized... Waiting for input!";
             }
             catch (Exception ex)
             {
@@ -134,8 +140,6 @@ namespace AcandoEmotionEngine
                 IRandomAccessStream photoStream = await photoFile.OpenReadAsync();
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.SetSource(photoStream);
-                CaptureImage.Width = bitmap.PixelWidth;
-                CaptureImage.Height = bitmap.PixelHeight;
                 CaptureImage.Source = bitmap;
 
                 AppStatus.Text = "Took Photo: " + photoFile.Name;
@@ -392,10 +396,22 @@ namespace AcandoEmotionEngine
         /// 
         private void InitializeIotHub()
         {
-            AppStatus.Text = "IoT Hub connection is up.";
+            AppStatus.Text = "Connecting to IoT Hub...";
 
             // Create IoT hub device client.
-            deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
+            if (deviceClient == null)
+            {
+                try
+                {
+                    deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
+                    AppStatus.Text = "Connected to IoT Hub";
+                }
+                catch (Exception e)
+                {
+                    AppStatus.Text = "Could not connect to IoT Hub: " + e.Message;
+                    azureLoggingToggleButton.IsChecked = false;
+                }
+            }
         }
 
         private static async void SendDeviceToCloudMessagesAsync(string messageString)
@@ -407,7 +423,7 @@ namespace AcandoEmotionEngine
 
         }
 
-        public async Task LogEmotionResultIot(List<EmoFace> emoFaces, string uri, bool? localLogging)
+        public async Task LogEmotionResultIot(List<EmoFace> emoFaces, string uri, bool? localLogging, bool? iotLogging)
         {
             var geolocator = new Geolocator();
             geolocator.DesiredAccuracyInMeters = 100;
@@ -437,13 +453,16 @@ namespace AcandoEmotionEngine
                 await FileIO.WriteTextAsync(logFile, message);
             }
 
-            try
+            if (iotLogging == true)
             {
-                SendDeviceToCloudMessagesAsync(message);
-            }
-            catch (Exception ex)
-            {
-                AppStatus.Text = ex.ToString();
+                try
+                {
+                    SendDeviceToCloudMessagesAsync(message);
+                }
+                catch (Exception ex)
+                {
+                    AppStatus.Text = ex.ToString();
+                }
             }
         }
         #endregion
@@ -500,10 +519,10 @@ namespace AcandoEmotionEngine
                 for (int i = 0; i < analyzeResultCount; i++)
                 {
                     outputString.AppendLine("Face: " + i);
-                    outputString.AppendLine("  FaceRectangle = left: " + emoFaces[i].FaceRectangle.Left
+                    /*outputString.AppendLine("  FaceRectangle = left: " + emoFaces[i].FaceRectangle.Left
                              + ", top: " + emoFaces[i].FaceRectangle.Top
                              + ", width: " + emoFaces[i].FaceRectangle.Width
-                             + ", height: " + emoFaces[i].FaceRectangle.Height);
+                             + ", height: " + emoFaces[i].FaceRectangle.Height);*/
 
                     outputString.AppendLine(String.Format("  Age: {0:0.###}.", emoFaces[i].FaceAttributes.Age));
                     outputString.AppendLine("  Gender: " + emoFaces[i].FaceAttributes.Gender);
@@ -576,5 +595,10 @@ namespace AcandoEmotionEngine
             logOutput.Text = outputString.ToString();
         }
         #endregion
+
+        private void azureLoggingToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            InitializeIotHub();
+        }
     }
 }

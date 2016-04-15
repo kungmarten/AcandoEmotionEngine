@@ -11,16 +11,20 @@
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBlock x:Name="Header" Text="Acando Emotion Engine" Margin="10,30,10,10" TextAlignment="Center" FontSize="26.667" />
             <TextBlock x:Name="AppStatus" Text="" Margin="10,30,10,10" TextAlignment="Center" FontSize="18" />
-            <Image x:Name="CaptureImage" Width="320" Height="320" MaxWidth ="1280" MaxHeight="720" Visibility="Visible"/>
-            <AppBarButton x:Name="CaptureButton" HorizontalAlignment="Stretch" Icon="Camera" Label="Take Photo!" VerticalAlignment="Stretch" d:LayoutOverrides="Width" Click="CaptureButton_Click"/>
+            <CaptureElement x:Name="PreviewImage" HorizontalAlignment="Center" Height="262" VerticalAlignment="Top" Width="328"/>
+            <AppBarButton x:Name="CaptureButton" HorizontalAlignment="Stretch" Icon="Camera" Label="Take Photo!" VerticalAlignment="Stretch" d:LayoutOverrides="Width" Click="CaptureButton_Click">
+                <Rectangle Fill="#FFF4F4F5" Height="100" Stroke="Black" Width="100"/>
+            </AppBarButton>
         </StackPanel>
-        <RelativePanel HorizontalAlignment="Left" VerticalAlignment="Center" Height="520" Margin="0">
-            <TextBox x:Name="logOutput" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"/>
-        </RelativePanel>
-        <RelativePanel HorizontalAlignment="Right" VerticalAlignment="Center" Height="520" Margin="0">
+        <RelativePanel HorizontalAlignment="Left" VerticalAlignment="Center" Height="520" Margin="0"/>
+        <RelativePanel HorizontalAlignment="Right" VerticalAlignment="Center" Height="290" Margin="3,0,0,0">
             <AppBarToggleButton x:Name="localLoggingToggleButton" HorizontalAlignment="Right" Icon="Accept" Label="Log to Local" Margin="0" VerticalAlignment="Stretch"/>
-            <AppBarToggleButton x:Name="azureLoggingToggleButton" HorizontalAlignment="Right" Icon="Accept" Label="Log to Azure" Margin="0,80,0,0" VerticalAlignment="Stretch"/>
+            <AppBarToggleButton x:Name="azureLoggingToggleButton" HorizontalAlignment="Right" Icon="Accept" Label="Log to Azure" Margin="0,80,0,0" VerticalAlignment="Stretch" Checked="azureLoggingToggleButton_Checked"/>
         </RelativePanel>
+        <StackPanel HorizontalAlignment="Left" Height="462" VerticalAlignment="Center" Width="250" Margin="0">
+            <Image x:Name="CaptureImage" MaxWidth ="1280" MaxHeight="720" Visibility="Visible" Height="160" Margin="0,50,0,0" Width="160" HorizontalAlignment="Left"/>
+            <TextBox x:Name="logOutput" HorizontalAlignment="Left" Margin="0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="250" Height="252"/>
+        </StackPanel>
     </Grid>
     <Page.BottomAppBar>
         <CommandBar IsOpen="True" IsSticky="True" IsEnabled="True" Foreground="#FF7C3C3C" RequestedTheme="Dark">
